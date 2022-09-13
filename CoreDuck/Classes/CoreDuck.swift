@@ -118,46 +118,6 @@ open class CoreDuck {
     #endif
   }()
   
-  // MARK: - Persistent Container
-  
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
-  /// Create Persistent Container
-  lazy var persistentContainer: NSPersistentContainer = {
-    let container = NSPersistentContainer(name: CoreDuck.coreDataModelName, managedObjectModel: managedObjectModel)
-    container.persistentStoreDescriptions = [persistentStoreDescription]
-    container.loadPersistentStores { description, error in
-      if let error = error as NSError? {
-        CoreDuck.printError("Failed to load persistent stores, \(error.userInfo)")
-      }
-    }
-    return container
-  }()
-  
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
-  /// Create persistent stores for the PersistentContainer
-  private lazy var persistentStoreDescription: NSPersistentStoreDescription = {
-    if let url = defaultPersistentStoreURL() {
-      let description = NSPersistentStoreDescription(url: url)
-      description.shouldMigrateStoreAutomatically = true
-      description.shouldInferMappingModelAutomatically = true
-      return description
-    } else {
-      let url = NSPersistentContainer.defaultDirectoryURL()
-      let description = NSPersistentStoreDescription(url: url)
-      description.shouldMigrateStoreAutomatically = true
-      description.shouldInferMappingModelAutomatically = true
-      return description
-    }
-  }()
-  
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
-  open lazy var newPersistentStoreCoordinator: NSPersistentStoreCoordinator = {
-    return persistentContainer.persistentStoreCoordinator
-  }()
-  
   /// NSManagedObjectContext with privateQueueConcurrencyType
   /// It's used internally in CoreDuck as the only context to write to persistence store
   /// For saving data use backgroundContext instead
@@ -170,28 +130,17 @@ open class CoreDuck {
   /// NSManagedObjectContext with mainQueueConcurrencyType
   /// Use it with UIKit, since it's the only NSManagedObjectContext that exists on main thread
   open lazy var mainContext: NSManagedObjectContext = {
-    if #available(iOS 10.0, OSX 10.12, *) {
-      let context = persistentContainer.viewContext
-      context.automaticallyMergesChangesFromParent = true
-      return context
-    } else {
-      let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-      context.parent = self.writingContext
-      return context
-    }
+    let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+    context.parent = self.writingContext
+    return context
   }()
   
   /// NSManagedObjectContext with privateQueueConcurrencyType
   /// Use it for background save operations
   open lazy var backgroundContext: NSManagedObjectContext = {
-    if #available(iOS 10.0, OSX 10.12, *) {
-      let context = persistentContainer.newBackgroundContext()
-      return context
-    } else {
-      let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-      context.parent = self.mainContext
-      return context
-    }
+    let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+    context.parent = self.mainContext
+    return context
   }()
   
   /// Save all contexts
@@ -313,11 +262,7 @@ open class CoreDuck {
   }
   
   public static func managedObjectID(forURIRepresentation uri: URL) -> NSManagedObjectID? {
-    if #available(iOS 10.0, OSX 10.12, *) {
-      return quack.newPersistentStoreCoordinator.managedObjectID(forURIRepresentation: uri)
-    } else {
-      return quack.persistentStoreCoordinator.managedObjectID(forURIRepresentation: uri)
-    }
+    return quack.persistentStoreCoordinator.managedObjectID(forURIRepresentation: uri)
   }
 
   // MARK: - Persistent Store
@@ -359,26 +304,14 @@ open class CoreDuck {
   @available(OSX 10.11, *)
   /// Destroy default NSPersistentStore at URL
   public func destroyDefaultPersistentStore() -> Bool {
-    if #available(iOS 10.0, OSX 10.12, *) {
-      guard let persistentStoreURL = getPersistentStoreURL() else { return false }
-      
-      do {
-        try newPersistentStoreCoordinator.destroyPersistentStore(at: persistentStoreURL, ofType: NSSQLiteStoreType, options: nil)
-        return true
-      } catch {
-        CoreDuck.printError(error.localizedDescription)
-        return false
-      }
-    } else {
-      guard let persistentStoreURL = defaultPersistentStoreURL() else { return false }
-      
-      do {
-        try persistentStoreCoordinator.destroyPersistentStore(at: persistentStoreURL, ofType: NSSQLiteStoreType, options: nil)
-        return true
-      } catch {
-        CoreDuck.printError(error.localizedDescription)
-        return false
-      }
+    guard let persistentStoreURL = defaultPersistentStoreURL() else { return false }
+    
+    do {
+      try persistentStoreCoordinator.destroyPersistentStore(at: persistentStoreURL, ofType: NSSQLiteStoreType, options: nil)
+      return true
+    } catch {
+      CoreDuck.printError(error.localizedDescription)
+      return false
     }
   }
 
@@ -386,15 +319,5 @@ open class CoreDuck {
   public func defaultPersistentStoreURL() -> URL? {
     let url = applicationStoreDirectory.appendingPathComponent("CoreData.sqlite")
     return url
-  }
-  
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
-  /// Get URL of persistent store if exists
-  func getPersistentStoreURL() -> URL? {
-    if let persistentStore = newPersistentStoreCoordinator.persistentStores.first {
-      return persistentStore.url
-    }
-    return nil
   }
 }
