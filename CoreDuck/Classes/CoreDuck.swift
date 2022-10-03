@@ -156,36 +156,25 @@ open class CoreDuck {
         // Save background NSManagedObjectContext
         try receivedContext.save()
         
-        if #available(iOS 10.0, OSX 10.12, *) {
-          CoreDuck.quack.mainContext.perform {
-            do {
-              try CoreDuck.quack.mainContext.save()
-            } catch let error as NSError {
-              CoreDuck.printError("Writing NSManagedObjectContext save error: \(error.userInfo)")
-              success = false
-            }
-          }
-        } else {
-          CoreDuck.quack.mainContext.perform {
-            do {
-              // Save main NSManagedObjectContext
-              try CoreDuck.quack.mainContext.save()
-              
-              CoreDuck.quack.writingContext.perform {
-                do {
-                  // Save writing NSManagedObjectContext
-                  try CoreDuck.quack.writingContext.save()
-                } catch let error as NSError {
-                  // Writing NSManagedObjectContext save error
-                  CoreDuck.printError("Writing NSManagedObjectContext save error: \(error.userInfo)")
-                  success = false
-                }
+        CoreDuck.quack.mainContext.perform {
+          do {
+            // Save main NSManagedObjectContext
+            try CoreDuck.quack.mainContext.save()
+            
+            CoreDuck.quack.writingContext.perform {
+              do {
+                // Save writing NSManagedObjectContext
+                try CoreDuck.quack.writingContext.save()
+              } catch let error as NSError {
+                // Writing NSManagedObjectContext save error
+                CoreDuck.printError("Writing NSManagedObjectContext save error: \(error.userInfo)")
+                success = false
               }
-            } catch let error as NSError {
-              // Main NSManagedObjectContext save error
-              CoreDuck.printError("Main NSManagedObjectContext save error: \(error.userInfo)")
-              success = false
             }
+          } catch let error as NSError {
+            // Main NSManagedObjectContext save error
+            CoreDuck.printError("Main NSManagedObjectContext save error: \(error.userInfo)")
+            success = false
           }
         }
       } catch let error as NSError {
@@ -210,36 +199,25 @@ open class CoreDuck {
         // Save background NSManagedObjectContext
         try receivedContext.save()
         
-        if #available(iOS 10.0, OSX 10.12, *) {
-          CoreDuck.quack.mainContext.performAndWait {
-            do {
-              try CoreDuck.quack.mainContext.save()
-            } catch let error as NSError {
-              CoreDuck.printError("Writing NSManagedObjectContext save error: \(error.userInfo)")
-              success = false
-            }
-          }
-        } else {
-          CoreDuck.quack.mainContext.performAndWait {
-            do {
-              // Save main NSManagedObjectContext
-              try CoreDuck.quack.mainContext.save()
-              
-              CoreDuck.quack.writingContext.performAndWait {
-                do {
-                  // Save writing NSManagedObjectContext
-                  try CoreDuck.quack.writingContext.save()
-                } catch let error as NSError {
-                  // Writing NSManagedObjectContext save error
-                  CoreDuck.printError("Writing NSManagedObjectContext save error: \(error.userInfo)")
-                  success = false
-                }
+        CoreDuck.quack.mainContext.performAndWait {
+          do {
+            // Save main NSManagedObjectContext
+            try CoreDuck.quack.mainContext.save()
+            
+            CoreDuck.quack.writingContext.performAndWait {
+              do {
+                // Save writing NSManagedObjectContext
+                try CoreDuck.quack.writingContext.save()
+              } catch let error as NSError {
+                // Writing NSManagedObjectContext save error
+                CoreDuck.printError("Writing NSManagedObjectContext save error: \(error.userInfo)")
+                success = false
               }
-            } catch let error as NSError {
-              // Main NSManagedObjectContext save error
-              CoreDuck.printError("Main NSManagedObjectContext save error: \(error.userInfo)")
-              success = false
             }
+          } catch let error as NSError {
+            // Main NSManagedObjectContext save error
+            CoreDuck.printError("Main NSManagedObjectContext save error: \(error.userInfo)")
+            success = false
           }
         }
       } catch let error as NSError {
@@ -297,21 +275,6 @@ open class CoreDuck {
       return false
     case .success:
       return true
-    }
-  }
-
-  @available(iOS 9.0, *)
-  @available(OSX 10.11, *)
-  /// Destroy default NSPersistentStore at URL
-  public func destroyDefaultPersistentStore() -> Bool {
-    guard let persistentStoreURL = defaultPersistentStoreURL() else { return false }
-    
-    do {
-      try persistentStoreCoordinator.destroyPersistentStore(at: persistentStoreURL, ofType: NSSQLiteStoreType, options: nil)
-      return true
-    } catch {
-      CoreDuck.printError(error.localizedDescription)
-      return false
     }
   }
 
