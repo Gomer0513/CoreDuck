@@ -132,6 +132,7 @@ open class CoreDuck {
   open lazy var mainContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
     context.parent = self.writingContext
+    context.automaticallyMergesChangesFromParent = true
     return context
   }()
   
