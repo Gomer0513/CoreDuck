@@ -120,8 +120,6 @@ open class CoreDuck {
   
   // MARK: - Persistent Container
   
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
   /// Create Persistent Container
   lazy var persistentContainer: NSPersistentContainer = {
     let container = NSPersistentContainer(name: CoreDuck.coreDataModelName, managedObjectModel: managedObjectModel)
@@ -134,8 +132,6 @@ open class CoreDuck {
     return container
   }()
   
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
   /// Create persistent stores for the PersistentContainer
   private lazy var persistentStoreDescription: NSPersistentStoreDescription = {
     if let url = defaultPersistentStoreURL() {
@@ -152,8 +148,6 @@ open class CoreDuck {
     }
   }()
   
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
   open lazy var newPersistentStoreCoordinator: NSPersistentStoreCoordinator = {
     return persistentContainer.persistentStoreCoordinator
   }()
@@ -355,8 +349,6 @@ open class CoreDuck {
     }
   }
 
-  @available(iOS 9.0, *)
-  @available(OSX 10.11, *)
   /// Destroy default NSPersistentStore at URL
   public func destroyDefaultPersistentStore() -> Bool {
     if #available(iOS 10.0, OSX 10.12, *) {
@@ -388,8 +380,6 @@ open class CoreDuck {
     return url
   }
   
-  @available(iOS 10.0, *)
-  @available(OSX 10.12, *)
   /// Get URL of persistent store if exists
   func getPersistentStoreURL() -> URL? {
     if let persistentStore = newPersistentStoreCoordinator.persistentStores.first {

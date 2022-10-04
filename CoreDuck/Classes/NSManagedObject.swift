@@ -46,8 +46,6 @@ public extension NSManagedObject {
   }
   
   /// Delete all NSManagedObject subclass instances with batch request
-  @available(iOS 9.0, *)
-  @available(OSX 10.11, *)
   static func batchDeleteAll() {
     let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: entityName)
     let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
